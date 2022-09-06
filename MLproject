@@ -5,6 +5,4 @@ docker_env:
 
 entry_points:
   main:
-    parameters:
-      input_dir: string
-    command: "python sentiment_analysis.py --input_dir {input_dir}"
+    command: "python sentiment_analysis.py"

@@ -1,4 +1,5 @@
 import mlflow
+import os
 import infinstor_mlflow_plugin
 import boto3
 from mlflow.store.artifact.models_artifact_repo import ModelsArtifactRepository
@@ -7,8 +8,21 @@ import pandas as pd
 import pickle
 import json
 import sys
+from parallels_plugin import parallels_core
 
-print(str(sys.argv))
+df = parallels_core.list(None, input_name='input1')
+
+print('Column Names:')
+cn = df.columns.values.tolist()
+print(str(cn))
+
+for ind, row in df.iterrows():
+    print('index=' + str(ind) + ", row=" + str(row))  
+
+os._exit(os.EX_OK)
+
+#print(str(sys.argv))
+
 ## tdir = tempfile.mkdtemp()
 ## print('model directory=' + str(tdir))
 ## ModelsArtifactRepository("models:/HFSentimentAnalysis/Production").download_artifacts(artifact_path="", dst_path=tdir)
