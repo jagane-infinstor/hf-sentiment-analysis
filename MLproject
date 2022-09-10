@@ -5,4 +5,4 @@ docker_env:
 
 entry_points:
   main:
-    command: "python sentiment_analysis.py"
+    command: "python3 sentiment_analysis.py"
