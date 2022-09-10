@@ -10,7 +10,7 @@ import json
 import sys
 from parallels_plugin import parallels_core
 
-df = parallels_core.list(None, input_name='input1')
+df = parallels_core.list(None, input_name='tweets')
 
 print('Column Names:')
 cn = df.columns.values.tolist()
