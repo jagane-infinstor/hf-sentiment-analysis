@@ -53,3 +53,4 @@ RUN python3 -m pip install --no-cache-dir decord
 # When installing in editable mode, `transformers` is not recognized as a package.
 # this line must be added in order for python to be aware of transformers.
 RUN cd transformers && python3 setup.py develop
+RUN ln -s /usr/bin/python3 /usr/bin/python
