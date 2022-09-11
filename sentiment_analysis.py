@@ -14,12 +14,12 @@ print('sentiment_analysis: Entered', flush=True)
 df = parallels_core.list(None, input_name='tweets')
 print('sentiment_analysis: After parallels_core.list', flush=True)
 
-print('Column Names:')
+print('Column Names:', flush=True)
 cn = df.columns.values.tolist()
 print(str(cn))
 
 for ind, row in df.iterrows():
-    print('index=' + str(ind) + ", row=" + str(row))  
+    print('index=' + str(ind) + ", row=" + str(row), flush=True)
 
 os._exit(os.EX_OK)
 
