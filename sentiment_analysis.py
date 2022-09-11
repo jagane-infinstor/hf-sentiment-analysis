@@ -12,14 +12,23 @@ from parallels_plugin import parallels_core
 
 print('sentiment_analysis: Entered', flush=True)
 df = parallels_core.list(None, input_name='tweets')
-print('sentiment_analysis: After parallels_core.list', flush=True)
 
 print('Column Names:', flush=True)
 cn = df.columns.values.tolist()
 print(str(cn))
 
+print('------------------------------', flush=True)
+
 for ind, row in df.iterrows():
     print('index=' + str(ind) + ", row=" + str(row), flush=True)
+
+print('------------------------------', flush=True)
+
+lp = get_local_paths(df)
+
+print('Location paths=' + str(lp))
+
+print('------------------------------', flush=True)
 
 os._exit(os.EX_OK)
 
