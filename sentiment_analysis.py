@@ -17,18 +17,40 @@ print('Column Names:', flush=True)
 cn = df.columns.values.tolist()
 print(str(cn))
 
-print('------------------------------', flush=True)
+print('------------------------------ Obtained input info ----------------', flush=True)
 
 for ind, row in df.iterrows():
     print('index=' + str(ind) + ", row=" + str(row), flush=True)
 
-print('------------------------------', flush=True)
+print('------------------------------ Finished dump of input info ----------------', flush=True)
 
-lp = get_local_paths(df)
+lp = parallels_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
-print('------------------------------', flush=True)
+print('------------------------------ Begin Loading Model ------------------', flush=True)
+
+tdir = tempfile.mkdtemp()
+print('model directory=' + str(tdir))
+ModelsArtifactRepository("models:/HFSentimentAnalysis/Production").download_artifacts(artifact_path="", dst_path=tdir)
+model = mlflow.pyfunc.load_model(tdir)
+print('model=' + str(model), flush=True)
+
+print('------------------------------ After Loading Model. Begin Inference ------------------', flush=True)
+
+for one_local_path in lp:
+    print('Begin processing file ' + str(one_local_path), flush=True)
+    jsonarray = pickle.load(open(one_local_path, 'rb'))
+    for i in jsonarray:
+      print(json.dumps(i), flush=True)
+    df1 = pd.DataFrame(jsonarray, columns=['text'])
+    ii = model.predict(df1)
+    ii.reset_index()
+    for index, row in ii.iterrows():
+        print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
+    print('------------------------------', flush=True)
+
+print('------------------------------ After Inference. End ------------------', flush=True)
 
 os._exit(os.EX_OK)
 
