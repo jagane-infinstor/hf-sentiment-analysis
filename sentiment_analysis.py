@@ -10,7 +10,9 @@ import json
 import sys
 from parallels_plugin import parallels_core
 
+print('sentiment_analysis: Entered', flush=True)
 df = parallels_core.list(None, input_name='tweets')
+print('sentiment_analysis: After parallels_core.list', flush=True)
 
 print('Column Names:')
 cn = df.columns.values.tolist()
