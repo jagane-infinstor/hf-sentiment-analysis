@@ -9,6 +9,7 @@ import pickle
 import json
 import sys
 from parallels_plugin import parallels_core
+from transformers import pipeline
 
 print('sentiment_analysis: Entered', flush=True)
 df = parallels_core.list(None, input_name='tweets')
@@ -20,7 +21,7 @@ print(str(cn))
 print('------------------------------ Obtained input info ----------------', flush=True)
 
 for ind, row in df.iterrows():
-    print('index=' + str(ind) + ", row=" + str(row), flush=True)
+    print("Input row=" + str(row), flush=True)
 
 print('------------------------------ Finished dump of input info ----------------', flush=True)
 
@@ -28,25 +29,24 @@ lp = parallels_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
-print('------------------------------ Begin Loading Model ------------------', flush=True)
+print('------------------------------ Begin Loading Huggingface Pipeline ------------------', flush=True)
+nlp = pipeline('sentiment-analysis')
+print('------------------------------ After Loading Huggingface Pipeline ------------------', flush=True)
 
-tdir = tempfile.mkdtemp()
-print('model directory=' + str(tdir))
-ModelsArtifactRepository("models:/HFSentimentAnalysis/Production").download_artifacts(artifact_path="", dst_path=tdir)
-model = mlflow.pyfunc.load_model(tdir)
-print('model=' + str(model), flush=True)
+def do_nlp_fnx(row):
+     s = nlp(row['text'])[0]
+     return [s['label'], s['score']]
 
-print('------------------------------ After Loading Model. Begin Inference ------------------', flush=True)
-
+print('------------------------------ Before Inference ------------------', flush=True)
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     jsonarray = pickle.load(open(one_local_path, 'rb'))
-    for i in jsonarray:
-      print(json.dumps(i), flush=True)
+    # for i in jsonarray:
+    #   print(json.dumps(i), flush=True)
     df1 = pd.DataFrame(jsonarray, columns=['text'])
-    ii = model.predict(df1)
-    ii.reset_index()
-    for index, row in ii.iterrows():
+    df1[['label', 'score']] = df1.apply(self.do_nlp_fnx, axis=1, result_type='expand')
+    df1.reset_index()
+    for index, row in df1.iterrows():
         print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
     print('------------------------------', flush=True)
 
