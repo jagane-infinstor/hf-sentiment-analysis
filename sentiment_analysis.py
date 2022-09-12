@@ -44,7 +44,7 @@ for one_local_path in lp:
     # for i in jsonarray:
     #   print(json.dumps(i), flush=True)
     df1 = pd.DataFrame(jsonarray, columns=['text'])
-    df1[['label', 'score']] = df1.apply(self.do_nlp_fnx, axis=1, result_type='expand')
+    df1[['label', 'score']] = df1.apply(do_nlp_fnx, axis=1, result_type='expand')
     df1.reset_index()
     for index, row in df1.iterrows():
         print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
