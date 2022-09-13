@@ -48,7 +48,11 @@ for one_local_path in lp:
     df1.reset_index()
     for index, row in df1.iterrows():
         print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
-    print('------------------------------', flush=True)
+    print('Finished processing file ' + str(one_local_path), flush=True)
+    tf_fd, tfname = tempfile.mkstemp()
+    df1.to_pickle(tfname)
+    parallels_core.parallels_log_artifact(tfname, "result/" + str(one_local_path), dict())
+    print('Finished logging artifacts file')
 
 print('------------------------------ After Inference. End ------------------', flush=True)
 
