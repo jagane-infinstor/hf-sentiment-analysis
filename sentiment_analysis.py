@@ -51,7 +51,7 @@ for one_local_path in lp:
     print('Finished processing file ' + str(one_local_path), flush=True)
     tf_fd, tfname = tempfile.mkstemp()
     df1.to_pickle(tfname)
-    parallels_core.parallels_log_artifact(tfname, "result/" + str(one_local_path), dict())
+    parallels_core.parallels_log_artifact(tfname, "result/" + str(one_local_path))
     print('Finished logging artifacts file')
 
 print('------------------------------ After Inference. End ------------------', flush=True)
