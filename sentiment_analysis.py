@@ -49,22 +49,24 @@ for one_local_path in lp:
     df1[['label', 'score']] = df1.apply(do_nlp_fnx, axis=1, result_type='expand')
     df1.reset_index()
     for index, row in df1.iterrows():
-        print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
+        # print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
         if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
             negatives = negatives + 1
         if row['label'] == 'POSITIVE' and row['score'] > 0.9:
             positives = positives + 1
-    print('Finished processing file ' + str(one_local_path), flush=True)
-    tf_fd, tfname = tempfile.mkstemp()
-    df1.to_pickle(tfname)
-    parallels_core.parallels_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
-    print('Finished logging artifacts file')
+    print('Finished processing file ' + str(one_local_path) + ': + ' + str(positives) + ', - ' + str(negatives), flush=True)
+    # tf_fd, tfname = tempfile.mkstemp()
+    # df1.to_pickle(tfname)
+    # parallels_core.parallels_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
+    # print('Finished logging artifacts file')
 
+fn = '/tmp/sentiment_summary.json'
+if os.path.exists(fn):
+    os.remove(fn)
 sentiment_summary = {'positives': positives, 'negatives': negatives}
-ss_fd, ssname = tempfile.mkstemp()
-with os.fdopen(ss_fd, 'w') as f:
+with os.fdopen(fn, 'w') as f:
     f.write(json.dumps(sentiment_summary))
-parallels_core.parallels_log_artifact(ssname, "sentiment_summary")
+parallels_core.parallels_log_artifact(fn, "")
 
 print('------------------------------ After Inference. End ------------------', flush=True)
 
