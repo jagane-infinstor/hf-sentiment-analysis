@@ -30,7 +30,7 @@ lp = parallels_core.get_local_paths(df)
 print('Location paths=' + str(lp))
 
 print('------------------------------ Begin Loading Huggingface Pipeline ------------------', flush=True)
-nlp = pipeline('sentiment-analysis')
+nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
 print('------------------------------ After Loading Huggingface Pipeline ------------------', flush=True)
 
 def do_nlp_fnx(row):
