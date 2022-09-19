@@ -38,6 +38,8 @@ def do_nlp_fnx(row):
      return [s['label'], s['score']]
 
 print('------------------------------ Before Inference ------------------', flush=True)
+negatives = 0
+positives = 0
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     jsonarray = pickle.load(open(one_local_path, 'rb'))
@@ -48,11 +50,21 @@ for one_local_path in lp:
     df1.reset_index()
     for index, row in df1.iterrows():
         print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
+        if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
+            negatives = negatives + 1
+        if row['label'] == 'POSITIVE' and row['score'] > 0.9:
+            positives = positives + 1
     print('Finished processing file ' + str(one_local_path), flush=True)
     tf_fd, tfname = tempfile.mkstemp()
     df1.to_pickle(tfname)
     parallels_core.parallels_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
     print('Finished logging artifacts file')
+
+sentiment_summary = {'positives': positives, 'negatives': negatives}
+ss_fd, ssname = tempfile.mkstemp()
+with os.fdopen(ss_fd, 'w') as f:
+    f.write(json.dumps(sentiment_summary))
+parallels_core.parallels_log_artifact(ssname, "sentiment_summary")
 
 print('------------------------------ After Inference. End ------------------', flush=True)
 
