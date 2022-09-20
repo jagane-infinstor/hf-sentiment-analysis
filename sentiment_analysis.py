@@ -64,7 +64,7 @@ fn = '/tmp/sentiment_summary.json'
 if os.path.exists(fn):
     os.remove(fn)
 sentiment_summary = {'positives': positives, 'negatives': negatives}
-with os.fdopen(fn, 'w') as f:
+with open(fn, 'w') as f:
     f.write(json.dumps(sentiment_summary))
 parallels_core.parallels_log_artifact(fn, "")
 
