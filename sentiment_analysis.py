@@ -8,11 +8,11 @@ import pandas as pd
 import pickle
 import json
 import sys
-from parallels_plugin import parallels_core
+from concurrent_plugin import concurrent_core
 from transformers import pipeline
 
 print('sentiment_analysis: Entered', flush=True)
-df = parallels_core.list(None, input_name='tweets')
+df = concurrent_core.list(None, input_name='tweets')
 
 print('Column Names:', flush=True)
 cn = df.columns.values.tolist()
@@ -25,7 +25,7 @@ for ind, row in df.iterrows():
 
 print('------------------------------ Finished dump of input info ----------------', flush=True)
 
-lp = parallels_core.get_local_paths(df)
+lp = concurrent_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
@@ -57,7 +57,7 @@ for one_local_path in lp:
     print('Finished processing file ' + str(one_local_path) + ': + ' + str(positives) + ', - ' + str(negatives), flush=True)
     # tf_fd, tfname = tempfile.mkstemp()
     # df1.to_pickle(tfname)
-    # parallels_core.parallels_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
+    # concurrent_core.concurrent_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
     # print('Finished logging artifacts file')
 
 fn = '/tmp/sentiment_summary.json'
@@ -66,7 +66,7 @@ if os.path.exists(fn):
 sentiment_summary = {'positives': positives, 'negatives': negatives}
 with open(fn, 'w') as f:
     f.write(json.dumps(sentiment_summary))
-parallels_core.parallels_log_artifact(fn, "")
+concurrent_core.concurrent_log_artifact(fn, "")
 
 print('------------------------------ After Inference. End ------------------', flush=True)
 
