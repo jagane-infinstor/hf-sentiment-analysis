@@ -30,10 +30,6 @@ lp = concurrent_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
-print('------------------------------ Begin Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
-nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
-print('------------------------------ After Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
-
 print('------------------------------ Begin Loading Huggingface ner model ------------------', flush=True)
 try:
     tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
@@ -45,10 +41,6 @@ print('------------------------------ After Loading Huggingface ner model ------
 print('------------------------------ Begin Creating Huggingface ner pipeline ------------------', flush=True)
 ner = pipeline('ner', model=model, tokenizer=tokenizer, aggregation_strategy="simple")
 print('------------------------------ After Creating Huggingface ner pipeline ------------------', flush=True)
-
-def do_nlp_fnx(row):
-    s = nlp(row['text'])[0]
-    return [s['label'], s['score']]
 
 def do_ner_fnx(row):
     s = ner(row['text'])[0]
@@ -65,37 +57,25 @@ def do_ner_fnx(row):
     return [orgs, persons, misc]
 
 print('------------------------------ Before Inference ------------------', flush=True)
-negatives = 0
-positives = 0
+consolidated_pd = None
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
-    jsonarray = pickle.load(open(one_local_path, 'rb'))
-    # for i in jsonarray:
-    #   print(json.dumps(i), flush=True)
-    df1 = pd.DataFrame(jsonarray, columns=['text'])
-    df1[['label', 'score']] = df1.apply(do_nlp_fnx, axis=1, result_type='expand')
-    df1.reset_index()
-    df1[['orgs', 'persons', 'misc']] = df1.apply(do_ner_fnx, axis=1, result_type='expand')
-    df1.reset_index()
-    for index, row in df1.iterrows():
-        print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", orgs=" + str(row['orgs']) + ", persons=" + str(row['persons']) + ", misc=" + str(row['misc']))
-        if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
-            negatives = negatives + 1
-        if row['label'] == 'POSITIVE' and row['score'] > 0.9:
-            positives = positives + 1
-    print('Finished processing file ' + str(one_local_path) + ': + ' + str(positives) + ', - ' + str(negatives), flush=True)
-    # tf_fd, tfname = tempfile.mkstemp()
-    # df1.to_pickle(tfname)
-    # concurrent_core.concurrent_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(one_local_path)))
-    # print('Finished logging artifacts file')
+    df1 = pd.read_pickle(one_local_path)
+    if consolidated_pd:
+        consolidated_pd = pd.DataFrame(df1)
+    else:
+        consolidated_pd = df1
 
-fn = '/tmp/sentiment_summary.json'
-if os.path.exists(fn):
-    os.remove(fn)
-sentiment_summary = {'positives': positives, 'negatives': negatives}
-with open(fn, 'w') as f:
-    f.write(json.dumps(sentiment_summary))
-concurrent_core.concurrent_log_artifact(fn, "")
+consolidated_pd[['label', 'score']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
+consolidated_pd.reset_index()
+for index, row in consolidated_pd.iterrows():
+    consolidated_pd[['orgs', 'persons', 'misc']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
+    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", orgs=" + str(row['orgs']) + ", persons=" + str(row['persons']) + ", misc=" + str(row['misc']))
+
+tf_fd, tfname = tempfile.mkstemp()
+consolidated_pd.to_pickle(tfname)
+concurrent_core.concurrent_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(tfname)))
+print('Finished logging artifacts file')
 
 print('------------------------------ After Inference. End ------------------', flush=True)
 
