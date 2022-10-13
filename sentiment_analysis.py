@@ -30,53 +30,41 @@ lp = concurrent_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
-print('------------------------------ Begin Loading Huggingface ner model ------------------', flush=True)
-try:
-    tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
-    model = AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
-except Exception as err:
-    print('Caught ' + str(err) + ' while loading ner model')
-print('------------------------------ After Loading Huggingface ner model ------------------', flush=True)
+print('------------------------------ Begin Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
+nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
+print('------------------------------ After Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
 
-print('------------------------------ Begin Creating Huggingface ner pipeline ------------------', flush=True)
-ner = pipeline('ner', model=model, tokenizer=tokenizer, aggregation_strategy="simple")
-print('------------------------------ After Creating Huggingface ner pipeline ------------------', flush=True)
-
-def do_ner_fnx(row):
-    s = ner(row['text'])[0]
-    orgs = []
-    persons = []
-    misc = []
-    for entry in s:
-        if entry['entity_group'] == 'ORG':
-            orgs.append(entry['word'])
-        elif entry['entity_group'] == 'PER':
-            persons.append(entry['word'])
-        elif entry['entity_group'] == 'MISC':
-            misc.append(entry['word'])
-    return [orgs, persons, misc]
+def do_nlp_fnx(row):
+    s = nlp(row['text'])[0]
+    return [s['label'], s['score']]
 
 print('------------------------------ Before Inference ------------------', flush=True)
 consolidated_pd = None
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
-    df1 = pd.read_pickle(one_local_path)
+    jsonarray = pickle.load(open(one_local_path, 'rb'))
+    # for i in jsonarray:
+    #   print(json.dumps(i), flush=True)
+    df1 = pd.DataFrame(jsonarray, columns=['text'])
     if consolidated_pd:
         consolidated_pd = pd.DataFrame(df1)
     else:
         consolidated_pd = df1
 
+negatives = 0
+positives = 0
 consolidated_pd[['label', 'score']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
 consolidated_pd.reset_index()
 for index, row in consolidated_pd.iterrows():
-    consolidated_pd[['orgs', 'persons', 'misc']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
-    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", orgs=" + str(row['orgs']) + ", persons=" + str(row['persons']) + ", misc=" + str(row['misc']))
-
+    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
+    if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
+        negatives = negatives + 1
+    if row['label'] == 'POSITIVE' and row['score'] > 0.9:
+        positives = positives + 1
 tf_fd, tfname = tempfile.mkstemp()
 consolidated_pd.to_pickle(tfname)
 concurrent_core.concurrent_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(tfname)))
 print('Finished logging artifacts file')
-
 print('------------------------------ After Inference. End ------------------', flush=True)
 
 os._exit(os.EX_OK)
