@@ -12,7 +12,7 @@ from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 print('sentiment_analysis: Entered', flush=True)
-df = concurrent_core.list(None, input_name='tweets')
+df = concurrent_core.list(None)
 
 print('Column Names:', flush=True)
 cn = df.columns.values.tolist()
