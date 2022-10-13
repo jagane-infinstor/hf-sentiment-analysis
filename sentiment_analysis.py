@@ -35,8 +35,11 @@ nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-ss
 print('------------------------------ After Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
 
 print('------------------------------ Begin Loading Huggingface ner model ------------------', flush=True)
-tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
-model = AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
+try:
+    tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
+    model = AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
+except Exception as err:
+    print('Caught ' + str(err) + ' while loading ner model')
 print('------------------------------ After Loading Huggingface ner model ------------------', flush=True)
 
 print('------------------------------ Begin Creating Huggingface ner pipeline ------------------', flush=True)
