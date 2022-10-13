@@ -10,6 +10,7 @@ import json
 import sys
 from concurrent_plugin import concurrent_core
 from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 print('sentiment_analysis: Entered', flush=True)
 df = concurrent_core.list(None, input_name='tweets')
@@ -29,13 +30,36 @@ lp = concurrent_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
 
-print('------------------------------ Begin Loading Huggingface Pipeline ------------------', flush=True)
+print('------------------------------ Begin Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
 nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
-print('------------------------------ After Loading Huggingface Pipeline ------------------', flush=True)
+print('------------------------------ After Loading Huggingface sentiment-analysis Pipeline ------------------', flush=True)
+
+print('------------------------------ Begin Loading Huggingface ner model ------------------', flush=True)
+tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
+model = AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
+print('------------------------------ After Loading Huggingface ner model ------------------', flush=True)
+
+print('------------------------------ Begin Creating Huggingface ner pipeline ------------------', flush=True)
+ner = pipeline('ner', model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+print('------------------------------ After Creating Huggingface ner pipeline ------------------', flush=True)
 
 def do_nlp_fnx(row):
-     s = nlp(row['text'])[0]
-     return [s['label'], s['score']]
+    s = nlp(row['text'])[0]
+    return [s['label'], s['score']]
+
+def do_ner_fnx(row):
+    s = ner(row['text'])[0]
+    orgs = []
+    persons = []
+    misc = []
+    for entry in s:
+        if entry['entity_group'] == 'ORG':
+            orgs.append(entry['word'])
+        elif entry['entity_group'] == 'PER':
+            persons.append(entry['word'])
+        elif entry['entity_group'] == 'MISC':
+            misc.append(entry['word'])
+    return [orgs, persons, misc]
 
 print('------------------------------ Before Inference ------------------', flush=True)
 negatives = 0
@@ -48,8 +72,10 @@ for one_local_path in lp:
     df1 = pd.DataFrame(jsonarray, columns=['text'])
     df1[['label', 'score']] = df1.apply(do_nlp_fnx, axis=1, result_type='expand')
     df1.reset_index()
+    df1[['orgs', 'persons', 'misc']] = df1.apply(do_ner_fnx, axis=1, result_type='expand')
+    df1.reset_index()
     for index, row in df1.iterrows():
-        # print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
+        print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", orgs=" + str(row['orgs']) + ", persons=" + str(row['persons']) + ", misc=" + str(row['misc']))
         if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
             negatives = negatives + 1
         if row['label'] == 'POSITIVE' and row['score'] > 0.9:
@@ -71,22 +97,3 @@ concurrent_core.concurrent_log_artifact(fn, "")
 print('------------------------------ After Inference. End ------------------', flush=True)
 
 os._exit(os.EX_OK)
-
-#print(str(sys.argv))
-
-## tdir = tempfile.mkdtemp()
-## print('model directory=' + str(tdir))
-## ModelsArtifactRepository("models:/HFSentimentAnalysis/Production").download_artifacts(artifact_path="", dst_path=tdir)
-## model = mlflow.pyfunc.load_model(tdir)
-## print('model=' + str(model))
-
-#inp = ['This is great weather', 'This is terrible weather']
-#jsonarray = pickle.load(open('/home/jagane/Downloads/1565264790192365568', 'rb'))
-#for i in jsonarray:
-#  print(json.dumps(i))
-
-#df = pd.DataFrame(jsonarray, columns=['text'])
-#ii = model.predict(df)
-#ii.reset_index()
-#for index, row in ii.iterrows():
-#  print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
