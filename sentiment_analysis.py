@@ -3,7 +3,6 @@ import os
 import infinstor_mlflow_plugin
 import boto3
 from mlflow.store.artifact.models_artifact_repo import ModelsArtifactRepository
-import tempfile
 import pandas as pd
 import pickle
 import json
@@ -61,9 +60,12 @@ for index, row in consolidated_pd.iterrows():
         negatives = negatives + 1
     if row['label'] == 'POSITIVE' and row['score'] > 0.9:
         positives = positives + 1
-tf_fd, tfname = tempfile.mkstemp()
+
+tfname = "/tmp/output.pickle"
+if os.path.exists(tfname):
+    os.remove(tfname)
 consolidated_pd.to_pickle(tfname)
-concurrent_core.concurrent_log_artifact(tfname, "result/" + os.path.basename(os.path.normpath(tfname)))
+concurrent_core.concurrent_log_artifact(tfname, "output.pickle")
 print('Finished logging artifacts file')
 print('------------------------------ After Inference. End ------------------', flush=True)
 
