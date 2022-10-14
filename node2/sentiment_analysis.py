@@ -71,14 +71,14 @@ for one_local_path in lp:
 consolidated_pd.reset_index()
 consolidated_pd[['ner']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
 consolidated_pd.reset_index()
-for index, row in consolidated_pd.iterrows():
-    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", ner=" + str(row['ner']))
+#for index, row in consolidated_pd.iterrows():
+#    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", ner=" + str(row['ner']))
 
 tfname = "/tmp/output.pickle"
 if os.path.exists(tfname):
     os.remove(tfname)
 consolidated_pd.to_pickle(tfname)
-concurrent_core.concurrent_log_artifact(tfname, "output.pickle")
+concurrent_core.concurrent_log_artifact(tfname, "")
 print('Finished logging artifacts file')
 
 print('------------------------------ After Inference. End ------------------', flush=True)

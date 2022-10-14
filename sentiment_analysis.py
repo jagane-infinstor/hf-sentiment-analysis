@@ -35,7 +35,7 @@ print('------------------------------ After Loading Huggingface sentiment-analys
 
 def do_nlp_fnx(row):
     s = nlp(row['text'])[0]
-    return [s['label'], s['score']]
+    return [s['label'], s['score'], row['user']['screen_name']]
 
 print('------------------------------ Before Inference ------------------', flush=True)
 consolidated_pd = None
@@ -44,22 +44,14 @@ for one_local_path in lp:
     jsonarray = pickle.load(open(one_local_path, 'rb'))
     # for i in jsonarray:
     #   print(json.dumps(i), flush=True)
-    df1 = pd.DataFrame(jsonarray, columns=['text'])
+    df1 = pd.DataFrame(jsonarray, columns=['text', 'user'])
     if consolidated_pd:
         consolidated_pd = pd.DataFrame(df1)
     else:
         consolidated_pd = df1
 
-negatives = 0
-positives = 0
-consolidated_pd[['label', 'score']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
+consolidated_pd[['label', 'score', 'screen_name']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
 consolidated_pd.reset_index()
-for index, row in consolidated_pd.iterrows():
-    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']))
-    if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
-        negatives = negatives + 1
-    if row['label'] == 'POSITIVE' and row['score'] > 0.9:
-        positives = positives + 1
 
 tfname = "/tmp/output.pickle"
 if os.path.exists(tfname):
