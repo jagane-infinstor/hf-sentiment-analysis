@@ -14,14 +14,14 @@ from transformers import pipeline
 print('sentiment_analysis: Entered', flush=True)
 df = concurrent_core.list(None)
 lp = concurrent_core.get_local_paths(df)
-consolidated_pd = None
+consolidated_pd = pd.DataFrame()
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     df1 = pd.read_pickle(one_local_path)
-    if consolidated_pd != None:
-        consolidated_pd = pd.DataFrame(df1)
-    else:
+    if consolidated_pd.empty:
         consolidated_pd = df1
+    else:
+        consolidated_pd = pd.DataFrame(df1)
 consolidated_pd.reset_index()
 
 positives = 0

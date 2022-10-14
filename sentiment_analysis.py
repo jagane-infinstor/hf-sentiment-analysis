@@ -57,7 +57,7 @@ tfname = "/tmp/output.pickle"
 if os.path.exists(tfname):
     os.remove(tfname)
 consolidated_pd.to_pickle(tfname)
-concurrent_core.concurrent_log_artifact(tfname, "output.pickle")
+concurrent_core.concurrent_log_artifact(tfname, "")
 print('Finished logging artifacts file')
 print('------------------------------ After Inference. End ------------------', flush=True)
 
