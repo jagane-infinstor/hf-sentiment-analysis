@@ -56,7 +56,7 @@ def do_ner_fnx(row):
         elif entry['entity_group'] == 'MISC':
             misc.append(entry['word'])
     print("do_ner_fnx: Exit. returning orgs=" + str(orgs) + ", persons=" + str(persons) + ", misc=" + str(misc)) 
-    return [orgs, persons, misc]
+    return {'orgs': orgs, 'persons': persons, 'misc': misc}
 
 print('------------------------------ Before Inference ------------------', flush=True)
 consolidated_pd = None
@@ -70,8 +70,8 @@ for one_local_path in lp:
 
 consolidated_pd.reset_index()
 for index, row in consolidated_pd.iterrows():
-    consolidated_pd[['orgs', 'persons', 'misc']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
-    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", orgs=" + str(row['orgs']) + ", persons=" + str(row['persons']) + ", misc=" + str(row['misc']))
+    consolidated_pd[['ner']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
+    print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", ner=" + str(row['ner']))
 
 tfname = "/tmp/output.pickle"
 if os.path.exists(tfname):
