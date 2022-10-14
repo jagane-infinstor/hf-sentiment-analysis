@@ -69,8 +69,9 @@ for one_local_path in lp:
         consolidated_pd = df1
 
 consolidated_pd.reset_index()
+consolidated_pd[['ner']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
+consolidated_pd.reset_index()
 for index, row in consolidated_pd.iterrows():
-    consolidated_pd[['ner']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
     print("'" + row['text'] + "' sentiment=" + row['label'] + ", score=" + str(row['score']) + ", ner=" + str(row['ner']))
 
 tfname = "/tmp/output.pickle"
