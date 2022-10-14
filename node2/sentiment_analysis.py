@@ -56,7 +56,7 @@ def do_ner_fnx(row):
         elif entry['entity_group'] == 'MISC':
             misc.append(entry['word'])
     print("do_ner_fnx: Exit. returning orgs=" + str(orgs) + ", persons=" + str(persons) + ", misc=" + str(misc)) 
-    return {'orgs': orgs, 'persons': persons, 'misc': misc}
+    return [{'orgs': orgs, 'persons': persons, 'misc': misc}]
 
 print('------------------------------ Before Inference ------------------', flush=True)
 consolidated_pd = None
