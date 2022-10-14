@@ -18,7 +18,7 @@ consolidated_pd = None
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     df1 = pd.read_pickle(one_local_path)
-    if consolidated_pd:
+    if consolidated_pd != None:
         consolidated_pd = pd.DataFrame(df1)
     else:
         consolidated_pd = df1
