@@ -42,6 +42,7 @@ ner = pipeline('ner', model=model, tokenizer=tokenizer, aggregation_strategy="si
 print('------------------------------ After Creating Huggingface ner pipeline ------------------', flush=True)
 
 def do_ner_fnx(row):
+    print("do_ner_fnx: Entered. row=" + str(row))
     s = ner(row['text'])[0]
     orgs = []
     persons = []
@@ -53,6 +54,7 @@ def do_ner_fnx(row):
             persons.append(entry['word'])
         elif entry['entity_group'] == 'MISC':
             misc.append(entry['word'])
+    print("do_ner_fnx: Exit. returning orgs=" + str(orgs) + ", persons=" + str(persons) + ", misc=" + str(misc)) 
     return [orgs, persons, misc]
 
 print('------------------------------ Before Inference ------------------', flush=True)
@@ -65,7 +67,6 @@ for one_local_path in lp:
     else:
         consolidated_pd = df1
 
-consolidated_pd[['label', 'score']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
 consolidated_pd.reset_index()
 for index, row in consolidated_pd.iterrows():
     consolidated_pd[['orgs', 'persons', 'misc']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')
