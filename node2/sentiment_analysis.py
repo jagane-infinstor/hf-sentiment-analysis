@@ -43,12 +43,18 @@ print('------------------------------ After Creating Huggingface ner pipeline --
 
 def do_ner_fnx(row):
     print("do_ner_fnx: Entered. row=" + str(row))
-    s = ner(row['text'])[0]
+    s = ner(row['text'])
     orgs = []
     persons = []
     misc = []
     for entry in s:
         print("do_ner_fnx: Entry=" + str(entry))
+        if entry['entity_group'] == 'ORG':
+            orgs.append(entry['word'])
+        elif entry['entity_group'] == 'PER':
+            persons.append(entry['word'])
+        elif entry['entity_group'] == 'MISC':
+            misc.append(entry['word'])
     print("do_ner_fnx: Exit. returning orgs=" + str(orgs) + ", persons=" + str(persons) + ", misc=" + str(misc)) 
     return [orgs, persons, misc]
 
