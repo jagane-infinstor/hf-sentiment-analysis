@@ -48,12 +48,7 @@ def do_ner_fnx(row):
     persons = []
     misc = []
     for entry in s:
-        if entry['entity_group'] == 'ORG':
-            orgs.append(entry['word'])
-        elif entry['entity_group'] == 'PER':
-            persons.append(entry['word'])
-        elif entry['entity_group'] == 'MISC':
-            misc.append(entry['word'])
+        print("do_ner_fnx: Entry=" + str(entry))
     print("do_ner_fnx: Exit. returning orgs=" + str(orgs) + ", persons=" + str(persons) + ", misc=" + str(misc)) 
     return [orgs, persons, misc]
 
