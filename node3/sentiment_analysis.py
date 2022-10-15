@@ -29,6 +29,10 @@ negatives = 0
 positives_samples = []
 negatives_samples = []
 def do_count(row):
+    global negatives
+    global negatives_samples
+    global positives
+    global positives_samples
     print("do_count: Entered. sentiment=" + row['label'] + ", score=" + str(row['score']) + ", ner=" + str(row['ner']))
     if row['label'] == 'NEGATIVE' and row['score'] > 0.9:
         negatives = negatives + 1
