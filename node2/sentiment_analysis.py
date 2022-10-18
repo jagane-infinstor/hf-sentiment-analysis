@@ -59,14 +59,14 @@ def do_ner_fnx(row):
     return [{'orgs': orgs, 'persons': persons, 'misc': misc}]
 
 print('------------------------------ Before Inference ------------------', flush=True)
-consolidated_pd = None
+consolidated_pd = pd.DataFrame()
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     df1 = pd.read_pickle(one_local_path)
-    if consolidated_pd:
-        consolidated_pd = pd.DataFrame(df1)
-    else:
+    if consolidated_pd.empty:
         consolidated_pd = df1
+    else:
+        consolidated_pd = pd.DataFrame(df1)
 
 consolidated_pd.reset_index()
 consolidated_pd[['ner']] = consolidated_pd.apply(do_ner_fnx, axis=1, result_type='expand')

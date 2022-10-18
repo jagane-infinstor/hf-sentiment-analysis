@@ -38,17 +38,17 @@ def do_nlp_fnx(row):
     return [s['label'], s['score'], row['user']['screen_name']]
 
 print('------------------------------ Before Inference ------------------', flush=True)
-consolidated_pd = None
+consolidated_pd = pd.DataFrame()
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     jsonarray = pickle.load(open(one_local_path, 'rb'))
     # for i in jsonarray:
     #   print(json.dumps(i), flush=True)
     df1 = pd.DataFrame(jsonarray, columns=['text', 'user'])
-    if consolidated_pd:
-        consolidated_pd = pd.DataFrame(df1)
-    else:
+    if consolidated_pd.empty:
         consolidated_pd = df1
+    else:
+        consolidated_pd = pd.DataFrame(df1)
 
 consolidated_pd[['label', 'score', 'screen_name']] = consolidated_pd.apply(do_nlp_fnx, axis=1, result_type='expand')
 consolidated_pd.reset_index()
