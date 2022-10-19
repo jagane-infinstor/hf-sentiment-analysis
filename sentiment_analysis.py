@@ -41,7 +41,11 @@ print('------------------------------ Before Inference ------------------', flus
 consolidated_pd = pd.DataFrame()
 for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
-    jsonarray = pickle.load(open(one_local_path, 'rb'))
+    try:
+        jsonarray = pickle.load(open(one_local_path, 'rb'))
+    except Exception is ex:
+        print('Error ' + str(ex) + ' processing file ' + str(one_local_path), flush=True)
+        continue
     # for i in jsonarray:
     #   print(json.dumps(i), flush=True)
     df1 = pd.DataFrame(jsonarray, columns=['text', 'user'])
