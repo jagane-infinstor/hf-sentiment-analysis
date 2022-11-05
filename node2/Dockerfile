@@ -1,6 +1,5 @@
 FROM nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 LABEL maintainer="Hugging Face"
-ARG CACHEBUST=2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -57,3 +56,4 @@ RUN cd transformers && python3 setup.py develop
 RUN python3 -c "from transformers import pipeline; nlp = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')"
 RUN python3 -c "from transformers import AutoTokenizer, AutoModelForTokenClassification; tokenizer = AutoTokenizer.from_pretrained('Jean-Baptiste/roberta-large-ner-english'); model = AutoModelForTokenClassification.from_pretrained('Jean-Baptiste/roberta-large-ner-english');"
 RUN ln -s /usr/bin/python3 /usr/bin/python
+ARG CACHEBUST=3
