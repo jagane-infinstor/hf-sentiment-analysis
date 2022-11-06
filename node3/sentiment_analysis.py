@@ -13,7 +13,7 @@ from transformers import pipeline
 
 print('sentiment_analysis: Entered', flush=True)
 df = concurrent_core.list(None)
-if df.isempty:
+if df.empty:
     print('No input files. Done', flush=True)
     os._exit(os.EX_OK)
 

@@ -25,7 +25,7 @@ for ind, row in df.iterrows():
 
 print('------------------------------ Finished dump of input info ----------------', flush=True)
 
-if df.isempty:
+if df.empty:
     print('No input files. Done', flush=True)
     os._exit(os.EX_OK)
 
