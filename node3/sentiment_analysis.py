@@ -13,6 +13,10 @@ from transformers import pipeline
 
 print('sentiment_analysis: Entered', flush=True)
 df = concurrent_core.list(None)
+if df.isempty:
+    print('No input files. Done', flush=True)
+    os._exit(os.EX_OK)
+
 lp = concurrent_core.get_local_paths(df)
 consolidated_pd = pd.DataFrame()
 for one_local_path in lp:

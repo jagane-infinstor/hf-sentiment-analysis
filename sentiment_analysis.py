@@ -25,6 +25,10 @@ for ind, row in df.iterrows():
 
 print('------------------------------ Finished dump of input info ----------------', flush=True)
 
+if df.isempty:
+    print('No input files. Done', flush=True)
+    os._exit(os.EX_OK)
+
 lp = concurrent_core.get_local_paths(df)
 
 print('Location paths=' + str(lp))
