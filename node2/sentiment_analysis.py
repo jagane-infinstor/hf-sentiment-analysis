@@ -68,7 +68,7 @@ for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     try:
         df1 = pd.read_pickle(one_local_path)
-    except Exception is ex:
+    except Exception as ex:
         print('Error ' + str(ex) + ' processing file ' + str(one_local_path), flush=True)
         continue
     if consolidated_pd.empty:

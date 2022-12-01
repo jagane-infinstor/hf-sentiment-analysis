@@ -47,7 +47,7 @@ for one_local_path in lp:
     print('Begin processing file ' + str(one_local_path), flush=True)
     try:
         jsonarray = pickle.load(open(one_local_path, 'rb'))
-    except Exception is ex:
+    except Exception as ex:
         print('Error ' + str(ex) + ' processing file ' + str(one_local_path), flush=True)
         continue
     # for i in jsonarray:
